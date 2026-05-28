@@ -1,5 +1,7 @@
 # Obsidian Claude Code Bridge
 
+English | [中文](README_CN.md)
+
 An Obsidian plugin that bridges selected text to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI in real-time.
 
 When you select text in Obsidian, the adjacent terminal running Claude Code automatically shows `⧉ Selected N lines from <file>` and includes the selection as context — just like VS Code.
