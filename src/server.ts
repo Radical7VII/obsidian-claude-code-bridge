@@ -51,6 +51,40 @@ export class BridgeServer {
     return this.client !== null && this.client.readyState === WebSocket.OPEN;
   }
 
+  private handleMessage(ws: WebSocket, msg: any): void {
+    if (!msg.method || msg.id === undefined) return;
+
+    if (msg.method === "initialize") {
+      ws.send(JSON.stringify({
+        jsonrpc: "2.0",
+        id: msg.id,
+        result: {
+          protocolVersion: "2024-11-05",
+          capabilities: { tools: {} },
+          serverInfo: { name: "Obsidian", version: "0.1.0" },
+        },
+      }));
+    } else if (msg.method === "tools/list") {
+      ws.send(JSON.stringify({
+        jsonrpc: "2.0",
+        id: msg.id,
+        result: { tools: [] },
+      }));
+    } else if (msg.method === "ping") {
+      ws.send(JSON.stringify({
+        jsonrpc: "2.0",
+        id: msg.id,
+        result: {},
+      }));
+    } else if (msg.id !== undefined) {
+      ws.send(JSON.stringify({
+        jsonrpc: "2.0",
+        id: msg.id,
+        result: {},
+      }));
+    }
+  }
+
   private tryListen(port: number): Promise<boolean> {
     return new Promise((resolve) => {
       const httpServer = createServer();
@@ -66,6 +100,13 @@ export class BridgeServer {
           this.client.close();
         }
         this.client = ws;
+
+        ws.on("message", (data) => {
+          try {
+            const msg = JSON.parse(data.toString());
+            this.handleMessage(ws, msg);
+          } catch {}
+        });
       });
 
       httpServer.on("error", () => resolve(false));

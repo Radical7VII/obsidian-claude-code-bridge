@@ -89,4 +89,51 @@ describe("BridgeServer", () => {
     await closePromise;
     ws2.close();
   });
+
+  it("responds to MCP initialize request", async () => {
+    server = new BridgeServer();
+    const port = await server.start();
+
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`, {
+      headers: { "x-claude-code-ide-authorization": server.authToken },
+    });
+
+    await new Promise<void>((resolve) => { ws.on("open", resolve); });
+
+    ws.send(JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "initialize",
+      params: { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "claude", version: "1.0" } },
+    }));
+
+    const msg = await new Promise<any>((resolve) => {
+      ws.on("message", (data) => resolve(JSON.parse(data.toString())));
+    });
+
+    expect(msg.id).toBe(1);
+    expect(msg.result.protocolVersion).toBe("2024-11-05");
+    expect(msg.result.serverInfo.name).toBe("Obsidian");
+    ws.close();
+  });
+
+  it("responds to tools/list with empty list", async () => {
+    server = new BridgeServer();
+    const port = await server.start();
+
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`, {
+      headers: { "x-claude-code-ide-authorization": server.authToken },
+    });
+
+    await new Promise<void>((resolve) => { ws.on("open", resolve); });
+
+    ws.send(JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} }));
+
+    const msg = await new Promise<any>((resolve) => {
+      ws.on("message", (data) => resolve(JSON.parse(data.toString())));
+    });
+
+    expect(msg).toEqual({ jsonrpc: "2.0", id: 2, result: { tools: [] } });
+    ws.close();
+  });
 });
