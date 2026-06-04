@@ -22,6 +22,16 @@ export default class ClaudeCodeBridgePlugin extends Plugin {
       (method, params) => this.server?.notify(method, params)
     );
 
+    // 打开或切换文件时立即推送一次活动文件信息（对齐 VS Code 扩展的
+    // onDidChangeActiveTextEditor 行为），而不是只等下一次轮询。
+    this.registerEvent(
+      this.app.workspace.on("active-leaf-change", () => this.emitSelection())
+    );
+    this.registerEvent(
+      this.app.workspace.on("file-open", () => this.emitSelection())
+    );
+
+    // 轮询用于捕获光标/选中变化（Obsidian 没有原生的 cursorActivity 事件）。
     this.registerInterval(
       window.setInterval(() => this.emitSelection(), 200)
     );
