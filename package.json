@@ -1,6 +1,6 @@
 {
   "name": "obsidian-claude-code-bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Bridge selected text in Obsidian to Claude Code CLI",
   "main": "main.js",
   "scripts": {

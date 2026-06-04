@@ -20,7 +20,7 @@ The plugin mimics VS Code's IDE MCP server protocol:
 ### Build from source
 
 ```bash
-git clone https://github.com/othnielsu/obsidian-claude-code-bridge.git
+git clone https://github.com/Radical7VII/obsidian-claude-code-bridge.git
 cd obsidian-claude-code-bridge
 npm install
 npm run build
