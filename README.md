@@ -1,40 +1,24 @@
 # Obsidian Claude Code Bridge
 
-English | [中文](README_CN.md)
+一个 Obsidian 插件，将当前打开的笔记和选中的文字实时传递给 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI。
 
-An Obsidian plugin that bridges selected text to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI in real-time.
+在 Obsidian 中打开笔记或选中文字后，旁边终端里的 Claude Code 会自动将该文件作为上下文 — 体验与 VS Code 一致。
 
-When you select text in Obsidian, the adjacent terminal running Claude Code automatically shows `⧉ Selected N lines from <file>` and includes the selection as context — just like VS Code.
+### 使用方法
 
-## How It Works
+1. 在 Obsidian 中启用插件
+2. 打开一个终端，**切换到你的 vault 目录**
+3. 运行 `claude`
+4. 运行 `/ide` 连接到 Obsidian
+5. 在 Obsidian 中打开笔记或选中文字 — Claude Code 会自动将该文件和选中内容作为上下文
 
-The plugin mimics VS Code's IDE MCP server protocol:
+> **注意：** Claude Code 必须从 vault 目录启动，否则无法匹配工作区。
 
-1. Starts a local WebSocket server on `127.0.0.1`
-2. Writes a discovery lock file to `~/.claude/ide/{port}.lock`
-3. Claude Code CLI auto-discovers and connects
-4. Selection changes are sent as JSON-RPC `selection_changed` notifications
+---
 
-## Installation
+An Obsidian plugin that bridges your active note and text selection to the [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI in real-time.
 
-### Build from source
-
-```bash
-git clone https://github.com/Radical7VII/obsidian-claude-code-bridge.git
-cd obsidian-claude-code-bridge
-npm install
-npm run build
-```
-
-### Install to Obsidian
-
-```bash
-VAULT="/path/to/your/vault"
-mkdir -p "$VAULT/.obsidian/plugins/claude-code-bridge"
-cp main.js manifest.json "$VAULT/.obsidian/plugins/claude-code-bridge/"
-```
-
-Then in Obsidian: **Settings → Community Plugins → Reload → Enable "Claude Code Bridge"**
+When you open a note or select text in Obsidian, the adjacent terminal running Claude Code automatically shows the file as context — just like VS Code.
 
 ## Usage
 
@@ -42,37 +26,11 @@ Then in Obsidian: **Settings → Community Plugins → Reload → Enable "Claude
 2. Open a terminal **in your vault directory**
 3. Run `claude`
 4. Run `/ide` to connect to Obsidian
-5. Select text in Obsidian — Claude Code will show the selection
+5. Open a note or select text in Obsidian — Claude Code automatically picks up the file and selection as context
 
 > **Important:** Claude Code must be started from the vault directory for workspace matching to work.
 
-## Development
-
-```bash
-npm run dev        # Watch mode
-npm run build      # Production build
-npm test           # Run tests
-npm run test:watch # Watch tests
-```
-
-## Architecture
-
-```
-┌─────────────────────┐       WebSocket (JSON-RPC 2.0)       ┌──────────────┐
-│  Obsidian Plugin    │ ◄──────────────────────────────────► │  Claude Code │
-│                     │                                       │  CLI         │
-│  - Selection Listener                                      │              │
-│  - WS Server (:port)│       Lock file auto-discovery       │  Auto-detect │
-│  - Lock file writer │ ────────────────────────────────────► │  & connect   │
-└─────────────────────┘   ~/.claude/ide/{port}.lock           └──────────────┘
-```
-
-| Component | File | Responsibility |
-|-----------|------|----------------|
-| Server | `src/server.ts` | WebSocket + MCP protocol handshake |
-| Lock File | `src/lockfile.ts` | Discovery file management |
-| Selection | `src/selection.ts` | Debounced selection change detection |
-| Main | `src/main.ts` | Plugin lifecycle wiring |
+---
 
 ## License
 
